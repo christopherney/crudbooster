@@ -1,0 +1,15 @@
+{
+  "title": "Multi-language Input",
+  "type": "multilang",
+  "attribute": {
+    "optional": {
+      "style": "string inline stylesheet",
+      "help": "string help-block",
+      "placeholder": "string placeholder",
+      "readonly": "boolean",
+      "disabled": "boolean",
+      "value": "string",
+      "max_fields": "string"
+    }
+  }
+}

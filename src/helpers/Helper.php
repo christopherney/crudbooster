@@ -9,6 +9,8 @@
 |
 */
 
+use Illuminate\Support\Facades\DB;
+
 if(!function_exists('assetThumbnail')) {
 	function assetThumbnail($path) {
 		$path = str_replace('uploads/','uploads_thumbnail/',$path);
@@ -31,6 +33,12 @@ if(!function_exists('assetResize')) {
 	}
 }
 
+/*
+| ---------------------------------------------------------------------------------------------------------------
+| Multi-language helper
+| ---------------------------------------------------------------------------------------------------------------
+|
+*/
 if(!function_exists('extract_unit')) {	
 	/*
 	Credits: Bit Repository
@@ -100,3 +108,24 @@ if(!function_exists('rrmdir')) {
 	 }
 }
 
+if(!function_exists('display_lang')) {
+    function display_lang($value, $lang='en') {
+        if (substr( $value, 0, 1 ) === "{" || substr( $value, 0, 1 ) === "[") {
+            return json_decode($value)->$lang;
+        } else {
+            return $value;
+        }
+    }
+}
+
+if(!function_exists('sub_sql')) {
+    function sub_sql($value, $request) {
+        // return json_encode($value);
+        $result = DB::select($request, [$value]);
+        foreach ($result as $item) {
+            // return $item;
+            return array_values(get_object_vars($item))[0];
+        }
+        return $value;
+    }
+}

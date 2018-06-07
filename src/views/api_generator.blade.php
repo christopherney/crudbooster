@@ -9,7 +9,10 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js"></script>
         <script type="text/javascript">
             $(document).ready(function () {
-                $('.wysiwyg').summernote();
+                $('.wysiwyg').summernote({
+                    toolbar: {!! config('summernote.toolbar') !!},
+                    height: {{config('summernote.height'}},
+                });
             })
         </script>
     @endpush

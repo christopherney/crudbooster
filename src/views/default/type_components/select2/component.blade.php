@@ -125,6 +125,18 @@
     </label>
 
     <div class="{{$col_width?:'col-sm-10'}}">
+        @if($form['add_action'] ||($form['edit_action']  && $value))
+        <div class="input-group">
+        @endif
+
+        @if($form['add_action'])
+        <span class="input-group-btn">
+            <a href="{{$form['add_action']}}" target="_blank" class="btn btn-default" type="button" tabindex="-1">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            </a>
+        </span>
+        @endif
+
         <select style='width:100%' class='form-control' id="{{$name}}"
                 {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} name="{{$name}}{{($form['relationship_table'])?'[]':''}}" {{ ($form['relationship_table'])?'multiple="multiple"':'' }} >
             @if($form['dataenum'])
@@ -215,6 +227,19 @@
             <!--end-datatable-->
             @endif
         </select>
+
+        @if($form['edit_action'] && $value)
+        <span class="input-group-btn">
+            <a href="{{$form['edit_action']}}/{{$value}}" target="_blank" class="btn btn-default" type="button" tabindex="-1">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+            </a>
+        </span>
+        @endif
+
+        @if($form['add_action'] ||($form['edit_action']  && $value))
+        </div>
+        @endif
+
         <div class="text-danger">
             {!! $errors->first($name)?"<i class='fa fa-info-circle'></i> ".$errors->first($name):"" !!}
         </div><!--end-text-danger-->

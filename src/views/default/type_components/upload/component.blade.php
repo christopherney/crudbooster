@@ -14,9 +14,11 @@
             $images_type = array('jpg', 'png', 'gif', 'jpeg', 'bmp', 'tiff');
             if(in_array(strtolower($ext), $images_type)):
             ?>
-            <p><a data-lightbox='roadtrip' href='{{$url}}'><img style='max-width:160px' title="Image For {{$form['label']}}" src='{{$url}}'/></a></p>
+            <p><a data-lightbox='roadtrip' href='{{$url}}'><img style='max-width:160px; background-color: #666;' title="Image For {{$form['label']}}" src='{{$url}}' /></a></p>
             <?php else:?>
-            <p><a href='{{$url}}'>{{trans("crudbooster.button_download_file")}}</a></p>
+            <p>
+                <a href='{{$url}}' target="_blank">{{trans("crudbooster.button_download_file")}}</a> <span>{{basename($url)}}</span>
+            </p>
             <?php endif;
             echo "<input type='hidden' name='_$name' value='$value'/>";
             else:

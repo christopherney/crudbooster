@@ -134,10 +134,51 @@ $name = str_slug($form['label'], '');
                                                            {{ ($col['min'])?"min='".$col['min']."'":"" }} {{ ($col['max'])?"max='$col[max]'":"" }} name='child-{{$col["name"]}}'
                                                            class='form-control {{$col['required']?"required":""}}'
                                                             {{($col['readonly']===true)?"readonly":""}}
+                                                           value="{{$col["value"]}}"
                                                     />
                                                 @elseif($col['type']=='textarea')
                                                     <textarea id='{{$name_column}}' name='child-{{$col["name"]}}'
-                                                              class='form-control {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
+                                                          class='form-control {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
+                                                @elseif($col['type']=='wysiwyg')
+
+                                                    @push('bottom')
+                                                        <script type="text/javascript">
+                                                            $(document).ready(function () {
+                                                                $('#{{$name_column}}').summernote({
+                                                                    toolbar: {!! config('summernote.toolbar') !!},
+                                                                    height: {{config('summernote.height')}},
+                                                                    callbacks: {
+                                                                        onImageUpload: function (image) {
+                                                                            uploadImage{{$name}}(image[0]);
+                                                                        }
+                                                                    }
+                                                                });
+
+                                                                function uploadImage{{$name_column}}(image) {
+                                                                    var data = new FormData();
+                                                                    data.append("userfile", image);
+                                                                    $.ajax({
+                                                                        url: '{{CRUDBooster::mainpath("upload-summernote")}}',
+                                                                        cache: false,
+                                                                        contentType: false,
+                                                                        processData: false,
+                                                                        data: data,
+                                                                        type: "post",
+                                                                        success: function (url) {
+                                                                            var image = $('<img>').attr('src', url);
+                                                                            $('#{{$name_column}}').summernote("insertNode", image[0]);
+                                                                        },
+                                                                        error: function (data) {
+                                                                            console.log(data);
+                                                                        }
+                                                                    });
+                                                                }
+                                                            })
+                                                        </script>
+                                                    @endpush
+
+                                                    <textarea id='{{$name_column}}' name='child-{{$col["name"]}}'
+                                                              class='form-control wysiwyg {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
                                                 @elseif($col['type']=='upload')
                                                     <div id='{{$name_column}}' class="input-group">
                                                         <input type="hidden" class="input-id">
@@ -172,7 +213,7 @@ $name = str_slug($form['label'], '');
 
                                                             // Grab the files and set them to our variable
                                                             function prepareUpload{{$name_column}}(event) {
-                                                                var max_size = {{ ($col['max'])?:2000 }};
+                                                                var max_size = {{ ($col['max'])?:str_replace('M', '000', ini_get('upload_max_filesize')) }};
                                                                 file = event.target.files[0];
 
                                                                 var filesize = Math.round(parseInt(file.size) / 1024);
@@ -404,25 +445,31 @@ $name = str_slug($form['label'], '');
                                                 currentRow = p;
                                                 p.addClass('warning');
                                                 $('#btn-add-table-{{$name}}').val('{{trans("crudbooster.save_changes")}}');
+
                                                 @foreach($form['columns'] as $c)
-                                                @if($c['type']=='select')
-                                                $('#{{$name.$c["name"]}}').val(p.find(".{{$c['name']}} input").val()).trigger("change");
-                                                        @elseif($c['type']=='radio')
-                                                var v = p.find(".{{$c['name']}} input").val();
-                                                $('.{{$name.$c["name"]}}[value=' + v + ']').prop('checked', true);
-                                                @elseif($c['type']=='datamodal')
-                                                $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} .td-label").text());
-                                                $('#{{$name.$c["name"]}} .input-id').val(p.find(".{{$c['name']}} input").val());
-                                                @elseif($c['type']=='upload')
-                                                @if($c['upload_type']=='image')
-                                                $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} img").data('label'));
-                                                @else
-                                                $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} a").data('label'));
-                                                @endif
-                                                $('#{{$name.$c["name"]}} .input-id').val(p.find(".{{$c['name']}} input").val());
-                                                @else
-                                                $('#{{$name.$c["name"]}}').val(p.find(".{{$c['name']}} input").val());
-                                                @endif
+
+                                                    @if($c['type']=='select')
+                                                        $('#{{$name.$c["name"]}}').val(p.find(".{{$c['name']}} input").val()).trigger("change");
+                                                    @elseif($c['type']=='radio')
+                                                        var v = p.find(".{{$c['name']}} input").val();
+                                                        $('.{{$name.$c["name"]}}[value=' + v + ']').prop('checked', true);
+                                                    @elseif($c['type']=='datamodal')
+                                                        $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} .td-label").text());
+                                                        $('#{{$name.$c["name"]}} .input-id').val(p.find(".{{$c['name']}} input").val());
+                                                    @elseif($c['type']=='upload')
+                                                        @if($c['upload_type']=='image')
+                                                            $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} img").data('label'));
+                                                        @else
+                                                            $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} a").data('label'));
+                                                        @endif
+                                                        $('#{{$name.$c["name"]}} .input-id').val(p.find(".{{$c['name']}} input").val());
+                                                    @elseif($c['type']=='wysiwyg')
+                                                        var code = p.find(".{{$c['name']}} input").val();
+                                                        $('#{{$name.$c["name"]}}').summernote('code', code);
+                                                    @else
+                                                        $('#{{$name.$c["name"]}}').val(p.find(".{{$c['name']}} input").val());
+                                                    @endif
+
                                                 @endforeach
                                             }
 
@@ -449,40 +496,50 @@ $name = str_slug($form['label'], '');
                                                     return false;
                                                 }
 
-                                                var trRow = '<tr>';
+                                                var trRow = "<tr>";
                                                 @foreach($form['columns'] as $c)
-                                                        @if($c['type']=='select')
-                                                    trRow += "<td class='{{$c['name']}}'>" + $('#{{$name.$c["name"]}} option:selected').text() +
-                                                    "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}}').val() + "'/>" +
-                                                    "</td>";
-                                                @elseif($c['type']=='radio')
-                                                    trRow += "<td class='{{$c['name']}}'><span class='td-label'>" + $('.{{$name.$c["name"]}}:checked').val() + "</span>" +
-                                                    "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('.{{$name.$c["name"]}}:checked').val() + "'/>" +
-                                                    "</td>";
-                                                @elseif($c['type']=='datamodal')
-                                                    trRow += "<td class='{{$c['name']}}'><span class='td-label'>" + $('#{{$name.$c["name"]}} .input-label').val() + "</span>" +
-                                                    "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}} .input-id').val() + "'/>" +
-                                                    "</td>";
-                                                @elseif($c['type']=='upload')
+                                                    // Column type: '{{$c['type']}}':
+                                                    @if($c['type']=='select')
+                                                        trRow += "<td class='{{$c['name']}}'>" + $('#{{$name.$c["name"]}} option:selected').text() +
+                                                        "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}}').val() + "'/>" +
+                                                        "</td>";
+                                                    @elseif($c['type']=='radio')
+                                                        trRow += "<td class='{{$c['name']}}'><span class='td-label'>" + $('.{{$name.$c["name"]}}:checked').val() + "</span>" +
+                                                        "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('.{{$name.$c["name"]}}:checked').val() + "'/>" +
+                                                        "</td>";
+                                                    @elseif($c['type']=='datamodal')
+                                                        trRow += "<td class='{{$c['name']}}'><span class='td-label'>" + $('#{{$name.$c["name"]}} .input-label').val() + "</span>" +
+                                                        "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}} .input-id').val() + "'/>" +
+                                                        "</td>";
+                                                    @elseif($c['type']=='upload')
                                                         @if($c['upload_type']=='image')
-                                                    trRow += "<td class='{{$c['name']}}'>" +
-                                                    "<a data-lightbox='roadtrip' href='{{asset('/')}}" + $('#{{$name.$c["name"]}} .input-id').val() + "'><img data-label='" + $('#{{$name.$c["name"]}} .input-label').val() + "' src='{{asset('/')}}" + $('#{{$name.$c["name"]}} .input-id').val() + "' width='50px' height='50px'/></a>" +
-                                                    "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}} .input-id').val() + "'/>" +
-                                                    "</td>";
-                                                @else
-                                                    trRow += "<td class='{{$c['name']}}'><a data-label='" + $('#{{$name.$c["name"]}} .input-label').val() + "' href='{{asset('/')}}" + $('#{{$name.$c["name"]}} .input-id').val() + "'>" + $('#{{$name.$c["name"]}} .input-label').val() + "</a>" +
-                                                    "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}} .input-id').val() + "'/>" +
-                                                    "</td>";
-                                                @endif
+                                                            trRow += "<td class='{{$c['name']}}'>" +
+                                                            "<a data-lightbox='roadtrip' href='{{asset('/')}}" + $('#{{$name.$c["name"]}} .input-id').val() + "'><img style='background-color: #666' data-label='" + $('#{{$name.$c["name"]}} .input-label').val() + "' src='{{asset('/')}}" + $('#{{$name.$c["name"]}} .input-id').val() + "' width='50px' height='50px'/></a>" +
+                                                            "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}} .input-id').val() + "'/>" +
+                                                            "</td>";
                                                         @else
-                                                    trRow += "<td class='{{$c['name']}}'>" + $('#{{$name.$c["name"]}}').val() +
-                                                    "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}}').val() + "'/>" +
-                                                    "</td>";
-                                                @endif
-                                                        @endforeach
-                                                    trRow += "<td>" +
-                                                    "<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a> " +
-                                                    "<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a></td>";
+                                                            trRow += "<td class='{{$c['name']}}'><a data-label='" + $('#{{$name.$c["name"]}} .input-label').val() + "' href='{{asset('/')}}" + $('#{{$name.$c["name"]}} .input-id').val() + "'>" + $('#{{$name.$c["name"]}} .input-label').val() + "</a>" +
+                                                            "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}} .input-id').val() + "'/>" +
+                                                            "</td>";
+                                                        @endif
+                                                    @elseif($c['type']=='wysiwyg')
+                                                        var html = $('#{{$name.$c["name"]}}').summernote('code');
+                                                        html = html.replace('"', "'");
+                                                        // var html = html.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                                                        trRow += "<td class=\"{{$c['name']}}\">";
+                                                        trRow += html;
+                                                        trRow += "<input type=\"hidden\" name=\"{{$name}}-{{$c['name']}}[]\" value=\"" + html + "\"/>";
+                                                        trRow += "</td>";
+                                                    @else
+                                                        trRow += "<td class='{{$c['name']}}'>" + $('#{{$name.$c["name"]}}').val() +
+                                                        "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}}').val() + "'/>" +
+                                                        "</td>";
+                                                    @endif
+                                                @endforeach
+                                                // Edit and Selete acctions:
+                                                trRow += "<td>" +
+                                                "<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a> " +
+                                                "<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a></td>";
                                                 trRow += '</tr>';
                                                 $('#table-{{$name}} tbody .trNull').remove();
                                                 if (currentRow == null) {
@@ -577,12 +634,17 @@ $name = str_slug($form['label'], '');
                                             } elseif ($col['type'] == 'upload') {
                                                 $filename = basename($d->{$col['name']});
                                                 if ($col['upload_type'] == 'image') {
-                                                    echo "<a href='".asset($d->{$col['name']})."' data-lightbox='roadtrip'><img data-label='$filename' src='".asset($d->{$col['name']})."' width='50px' height='50px'/></a>";
+                                                    echo "<a href='".asset($d->{$col['name']})."' data-lightbox='roadtrip'><img style='background-color: #666' data-label='$filename' src='".asset($d->{$col['name']})."' width='50px' height='50px'/></a>";
                                                     echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
                                                 } else {
                                                     echo "<a data-label='$filename' href='".asset($d->{$col['name']})."'>$filename</a>";
                                                     echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
                                                 }
+                                            } elseif ($col['type'] == 'wysiwyg') {
+                                                echo "<span class='td-label'>";
+                                                echo str_replace("\'", "'", $d->{$col['name']});
+                                                echo "</span>";
+                                                echo "<input type=\"hidden\" name=\"".$name."-".$col['name']."[]\" value=\"".str_replace("\'", "'", $d->{$col['name']})."\"/>";
                                             } else {
                                                 echo "<span class='td-label'>";
                                                 echo $d->{$col['name']};

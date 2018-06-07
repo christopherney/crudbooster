@@ -2,7 +2,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#textarea_{{$name}}').summernote({
-                height: ($(window).height() - 300),
+                toolbar: {!! config('summernote.toolbar') !!},
+                height: {{config('summernote.height')}},
                 callbacks: {
                     onImageUpload: function (image) {
                         uploadImage{{$name}}(image[0]);
@@ -36,7 +37,7 @@
     <label class='control-label col-sm-2'>{{$form['label']}}</label>
 
     <div class="{{$col_width?:'col-sm-10'}}">
-        <textarea id='textarea_{{$name}}' id="{{$name}}" {{$required}} {{$readonly}} {{$disabled}} name="{{$form['name']}}" class='form-control'
+        <textarea id='textarea_{{$name}}' id="{{$name}}" {{$required}} {{$readonly}} {{$disabled}} name="{{$form['name']}}" class='form-control wysiwyg'
                   rows='5'>{{ $value }}</textarea>
         <div class="text-danger">{{ $errors->first($name) }}</div>
         <p class='help-block'>{{ @$form['help'] }}</p>

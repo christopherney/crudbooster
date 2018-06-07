@@ -36,6 +36,7 @@
     $icon = $a['icon'];
     $color = $a['color'] ?: 'primary';
     $confirmation = $a['confirmation'];
+    $attributes = $a['attr'] ?: '';
 
 
     $url = $a['url'];
@@ -52,10 +53,10 @@
         }
 
         @eval("if($query) {
-          echo \"<a class='btn btn-xs btn-\$color' title='\$title' onclick='\$confirm_box' href='\$url'><i class='\$icon'></i> $label</a>&nbsp;\";
+          echo \"<a class='btn btn-xs btn-\$color' title='\$title' onclick='\$confirm_box' href='\$url' \$attributes><i class='\$icon'></i> $label</a>&nbsp;\";
       }");
     } else {
-        echo "<a class='btn btn-xs btn-$color' title='$title' onclick='$confirm_box' href='$url'><i class='$icon'></i> $label</a>&nbsp;";
+        echo "<a class='btn btn-xs btn-$color' title='$title' onclick='$confirm_box' href='$url' $attributes><i class='$icon'></i> $label</a>&nbsp;";
     }
     ?>
 @endforeach
@@ -74,7 +75,7 @@
 
     @if(CRUDBooster::isDelete() && $button_delete)
         <?php $url = CRUDBooster::mainpath("delete/".$row->$pk);?>
-        <a class='btn btn-xs btn-warning btn-delete' title='{{trans("crudbooster.action_delete_data")}}' href='javascript:;'
+        <a class='btn btn-xs btn-danger btn-delete' title='{{trans("crudbooster.action_delete_data")}}' href='javascript:;'
            onclick='{{CRUDBooster::deleteConfirm($url)}}'>{{trans("crudbooster.action_delete_data")}}</a>
     @endif
 @elseif($button_action_style == 'button_icon_text')
@@ -94,7 +95,7 @@
 
     @if(CRUDBooster::isDelete() && $button_delete)
         <?php $url = CRUDBooster::mainpath("delete/".$row->$pk);?>
-        <a class='btn btn-xs btn-warning btn-delete' title='{{trans("crudbooster.action_delete_data")}}' href='javascript:;'
+        <a class='btn btn-xs btn-danger btn-delete' title='{{trans("crudbooster.action_delete_data")}}' href='javascript:;'
            onclick='{{CRUDBooster::deleteConfirm($url)}}'><i class='fa fa-trash'></i> {{trans("crudbooster.action_delete_data")}}</a>
     @endif
 
@@ -117,6 +118,7 @@
                 $url = $a['url']."?return_url=".urlencode(Request::fullUrl());
                 $icon = $a['icon'];
                 $color = $a['color'] ?: 'primary';
+                $attributes = $a['attr'] ?: '';
 
                 if (isset($a['showIf'])) {
 
@@ -127,10 +129,10 @@
                     }
 
                     @eval("if($query) {
-                        echo \"<li><a title='\$label' href='\$url'><i class='\$icon'></i> \$label</a></li>\";
+                        echo \"<li><a title='\$label' href='\$url' \$attributes><i class='\$icon'></i> \$label</a></li>\";
                     }");
                 } else {
-                    echo "<li><a title='$label' href='$url'><i class='$icon'></i> $label</a></li>";
+                    echo '<li><a title="'.$label.'" href="'.$url.'" '.$attributes.'><i class="'.$icon.'"></i> '.$label.'</a></li>';
                 }
                 ?>
             @endforeach
@@ -170,7 +172,7 @@
 
     @if(CRUDBooster::isDelete() && $button_delete)
         <?php $url = CRUDBooster::mainpath("delete/".$row->$pk);?>
-        <a class='btn btn-xs btn-warning btn-delete' title='{{trans("crudbooster.action_delete_data")}}' href='javascript:;'
+        <a class='btn btn-xs btn-danger btn-delete' title='{{trans("crudbooster.action_delete_data")}}' href='javascript:;'
            onclick='{{CRUDBooster::deleteConfirm($url)}}'><i class='fa fa-trash'></i></a>
     @endif
 

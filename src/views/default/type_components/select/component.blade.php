@@ -60,12 +60,24 @@
 @endif
 <div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}' id='form-group-{{$name}}' style="{{@$form['style']}}">
     <label class='control-label col-sm-2'>{{$form['label']}}
-        @if($required)
+        @if($form['parent_select'])
             <span class='text-danger' title='{!! trans('crudbooster.this_field_is_required') !!}'>*</span>
         @endif
     </label>
 
     <div class="{{$col_width?:'col-sm-10'}}">
+        @if($form['add_action'] ||($form['edit_action']  && $value))
+        <div class="input-group">
+        @endif
+
+        @if($form['add_action'])
+        <span class="input-group-btn">
+            <a href="{{$form['add_action']}}" target="_blank" class="btn btn-default" type="button" tabindex="-1">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            </a>
+        </span>
+        @endif
+
         <select class='form-control' id="{{$name}}" data-value='{{$value}}' {{$required}} {!!$placeholder!!} {{$readonly}} {{$disabled}} name="{{$name}}">
             <option value=''>{{$default}}</option>
             <?php
@@ -162,6 +174,19 @@
             } //end if not parent select
             ?>
         </select>
+
+        @if($form['edit_action'] && $value)
+        <span class="input-group-btn">
+            <a href="{{$form['edit_action']}}/{{$value}}" target="_blank" class="btn btn-default" type="button" tabindex="-1">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+            </a>
+        </span>
+        @endif
+
+        @if($form['add_action'] ||($form['edit_action']  && $value))
+        </div>
+        @endif
+
         <div class="text-danger">{!! $errors->first($name)?"<i class='fa fa-info-circle'></i> ".$errors->first($name):"" !!}</div>
         <p class='help-block'>{{ @$form['help'] }}</p>
     </div>
